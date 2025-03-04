@@ -146,7 +146,7 @@ module.exports = function(grunt) {
     },
     replace: {
       files: {
-        src: ['dist/*.js', 'bower.json', 'component.json', 'jstree.jquery.json'],
+        src: ['dist/*.js', 'bower.json', 'jstree.jquery.json'],
         overwrite: true,
         replacements: [
           {

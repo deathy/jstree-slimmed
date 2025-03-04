@@ -18,7 +18,6 @@
 		"gruntfile.js",
 		"package.json",
 		"bower.json",
-		"component.json",
 		"LICENCE-MIT",
 		"README.md"
 	],
