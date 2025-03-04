@@ -12,8 +12,8 @@ module.exports = function(grunt) {
         separator : "\n"
       },
       dist: {
-        src: ['src/<%= pkg.name %>.js', 'src/<%= pkg.name %>.*.js', 'src/vakata-jstree.js'],
-        dest: 'dist/<%= pkg.name %>.js'
+        src: ['src/jstree.js', 'src/jstree.*.js', 'src/vakata-jstree.js'],
+        dest: 'dist/jstree-slimmed.js'
       }
     },
     copy: {
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
       },
       dist: {
         src: ['<%= concat.dist.dest %>'],
-        dest: 'dist/<%= pkg.name %>.min.js'
+        dest: 'dist/jstree-slimmed.min.js'
       }
     },
     jshint: {
@@ -70,8 +70,8 @@ module.exports = function(grunt) {
           'ActiveXObject' : true
         }
       },
-      beforeconcat: ['src/<%= pkg.name %>.js', 'src/<%= pkg.name %>.*.js'],
-      afterconcat: ['dist/<%= pkg.name %>.js']
+      beforeconcat: ['src/jstree.js', 'src/jstree.*.js'],
+      afterconcat: ['dist/jstree-slimmed.js']
     },
     dox: {
       files: {
@@ -81,8 +81,8 @@ module.exports = function(grunt) {
     },
     amd : {
       files: {
-        src: ['dist/jstree.js'],
-        dest: 'dist/jstree.js'
+        src: ['dist/jstree-slimmed.js'],
+        dest: 'dist/jstree-slimmed.js'
       }
     },
     less: {
@@ -146,7 +146,7 @@ module.exports = function(grunt) {
     },
     replace: {
       files: {
-        src: ['dist/*.js', 'bower.json', 'jstree.jquery.json'],
+        src: ['dist/*.js'],
         overwrite: true,
         replacements: [
           {
@@ -198,7 +198,7 @@ module.exports = function(grunt) {
         done = this.async(),
         doxPath = path.resolve(__dirname),
         formatter = [doxPath, 'node_modules', '.bin', 'dox'].join(path.sep);
-    exec(formatter + ' < "dist/jstree.js" > "docs/jstree.json"', {maxBuffer: 5000*1024}, function(error, stout, sterr){
+    exec(formatter + ' < "dist/jstree-slimmed.js" > "docs/jstree.json"', {maxBuffer: 5000*1024}, function(error, stout, sterr){
       if (error) {
         grunt.log.error(formatter);
         grunt.log.error("WARN: "+ error);
