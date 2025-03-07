@@ -3,10 +3,10 @@
   "title": "jsTree-slimmed",
   "description": "jQuery tree plugin - slimmed down fork",
   "version": "3.3.17-slimmed",
-  "private": "false",
   "homepage": "https://github.com/deathy/jstree-slimmed",
   "main": "./dist/jstree-slimmed.js",
   "author": "deathy",
+  "private": false,
   "contributors": [
     {
       "name": "Cristian Vat",
@@ -47,5 +47,8 @@
   },
   "dependencies": {
     "jquery": "^3.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
