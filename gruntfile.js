@@ -22,11 +22,6 @@ module.exports = function(grunt) {
           { expand: true, cwd : 'libs/', src: ['*'], dest: 'dist/libs/' }
         ]
       },
-      docs : {
-        files : [
-          { expand: true, cwd : 'dist/', src: ['**/*'], dest: 'docs/assets/dist/' }
-        ]
-      }
     },
     uglify: {
       options: {
@@ -72,12 +67,6 @@ module.exports = function(grunt) {
       },
       beforeconcat: ['src/jstree.js', 'src/jstree.*.js'],
       afterconcat: ['dist/jstree-slimmed.js']
-    },
-    dox: {
-      files: {
-        src: ['src/*.js'],
-        dest: 'docs'
-      }
     },
     amd : {
       files: {
@@ -192,29 +181,10 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerMultiTask('dox', 'Generate dox output ', function() {
-    var exec = require('child_process').exec,
-        path = require('path'),
-        done = this.async(),
-        doxPath = path.resolve(__dirname),
-        formatter = [doxPath, 'node_modules', '.bin', 'dox'].join(path.sep);
-    exec(formatter + ' < "dist/jstree-slimmed.js" > "docs/jstree.json"', {maxBuffer: 5000*1024}, function(error, stout, sterr){
-      if (error) {
-        grunt.log.error(formatter);
-        grunt.log.error("WARN: "+ error);
-      }
-      if (!error) {
-        grunt.log.writeln('dist/jstree.js doxxed.');
-        done();
-      }
-    });
-  });
-
   grunt.util.linefeed = "\n";
 
   // Default task.
-  //grunt.registerTask('default', ['jshint:beforeconcat','concat','amd','jshint:afterconcat','copy:libs','uglify','less','imagemin','replace','copy:docs','qunit','resemble','dox']);
-  grunt.registerTask('default', ['jshint:beforeconcat','concat','amd','jshint:afterconcat','copy:libs','uglify','less','replace','copy:docs','dox']);
+  grunt.registerTask('default', ['jshint:beforeconcat','concat','amd','jshint:afterconcat','copy:libs','uglify','less','imagemin','replace']);
   grunt.registerTask('js', ['concat','amd','uglify']);
   grunt.registerTask('css', ['copy','less']);
 
