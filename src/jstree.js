@@ -1,4 +1,7 @@
 /*!
+ * Hard slimmed-down fork Copyright (c) 2025 Cristian Vat
+ */
+/*!
  * jsTree {{VERSION}}
  * http://jstree.com/
  *

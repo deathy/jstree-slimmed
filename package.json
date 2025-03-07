@@ -1,32 +1,38 @@
 {
-  "name": "jstree",
-  "title": "jsTree",
-  "description": "jQuery tree plugin",
-  "version": "3.3.17",
-  "homepage": "http://jstree.com",
-  "main": "./dist/jstree.js",
-  "author": {
-    "name": "Ivan Bozhanov",
-    "email": "jstree@jstree.com",
-    "url": "http://vakata.com"
-  },
+  "name": "@deathy/jstree-slimmed",
+  "title": "jsTree-slimmed",
+  "description": "jQuery tree plugin - slimmed down fork",
+  "version": "3.3.17-slimmed",
+  "homepage": "https://github.com/deathy/jstree-slimmed",
+  "main": "./dist/jstree-slimmed.js",
+  "author": "deathy",
+  "contributors": [
+    {
+      "name": "Cristian Vat",
+      "url": "https://deathy.ro"
+    },
+    {
+      "name": "Ivan Bozhanov",
+      "email": "jstree@jstree.com",
+      "url": "http://vakata.com"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/vakata/jstree.git"
+    "url": "git://github.com/deathy/jstree-slimmed.git"
   },
   "bugs": {
-    "url": "https://github.com/vakata/jstree/issues"
+    "url": "https://github.com/deathy/jstree-slimmed/issues"
   },
   "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/vakata/jstree/blob/master/LICENSE-MIT"
+      "url": "https://github.com/deathy/jstree-slimmed/blob/master/LICENSE-MIT"
     }
   ],
   "keywords": [],
   "devDependencies": {
-    "dox": "^1.0.0",
     "grunt": "~1.6.1",
     "grunt-contrib-concat": "*",
     "grunt-contrib-copy": "*",
@@ -40,17 +46,5 @@
   },
   "dependencies": {
     "jquery": "^3.5.0"
-  },
-  "npmName": "jstree",
-  "npmFileMap": [
-    {
-      "basePath": "/dist/",
-      "files": [
-        "jstree.min.js",
-        "themes/**/*.png",
-        "themes/**/*.gif",
-        "themes/**/*.min.css"
-      ]
-    }
-  ]
+  }
 }

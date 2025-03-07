@@ -1,3 +1,9 @@
+# jstree-slimmed
+
+Hard fork with most features except basic tree and checkboxes removed.
+
+Probably nobody should be using this, you probably want the great original [jsTree](https://github.com/vakata/jstree)
+
 # jstree
 
 [jsTree](http://www.jstree.com/) is jquery plugin, that provides interactive trees. It is absolutely free, [open source](https://github.com/vakata/jstree) and distributed under the MIT license.
