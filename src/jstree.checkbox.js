@@ -106,7 +106,7 @@
 					}.bind(this));
 			if(this.settings.checkbox.cascade.indexOf('undetermined') !== -1) {
 				this.element
-					.on('changed.jstree uncheck_node.jstree check_node.jstree uncheck_all.jstree check_all.jstree move_node.jstree copy_node.jstree redraw.jstree open_node.jstree', function () {
+					.on('changed.jstree uncheck_node.jstree check_node.jstree uncheck_all.jstree check_all.jstree redraw.jstree open_node.jstree', function () {
 							// only if undetermined is in setting
 							if(this._data.checkbox.uto) { clearTimeout(this._data.checkbox.uto); }
 							this._data.checkbox.uto = setTimeout(this._undetermined.bind(this), 50);
@@ -298,93 +298,6 @@
 							}
 
 							this._data[ t ? 'core' : 'checkbox' ].selected = cur;
-						}.bind(this));
-			}
-			if(this.settings.checkbox.cascade.indexOf('up') !== -1) {
-				this.element
-					.on('delete_node.jstree', function (e, data) {
-							// apply up (whole handler)
-							var p = this.get_node(data.parent),
-								m = this._model.data,
-								i, j, c, tmp, t = this.settings.checkbox.tie_selection;
-							while(p && p.id !== $.jstree.root && !p.state[ t ? 'selected' : 'checked' ]) {
-								c = 0;
-								for(i = 0, j = p.children.length; i < j; i++) {
-									c += m[p.children[i]].state[ t ? 'selected' : 'checked' ];
-								}
-								if(j > 0 && c === j) {
-									p.state[ t ? 'selected' : 'checked' ] = true;
-									this._data[ t ? 'core' : 'checkbox' ].selected.push(p.id);
-									tmp = this.get_node(p, true);
-									if(tmp && tmp.length) {
-										tmp.children('.jstree-anchor').attr('aria-selected', true).addClass(t ? 'jstree-clicked' : 'jstree-checked');
-									}
-								}
-								else {
-									break;
-								}
-								p = this.get_node(p.parent);
-							}
-						}.bind(this))
-					.on('move_node.jstree', function (e, data) {
-							// apply up (whole handler)
-							var is_multi = data.is_multi,
-								old_par = data.old_parent,
-								new_par = this.get_node(data.parent),
-								m = this._model.data,
-								p, c, i, j, tmp, t = this.settings.checkbox.tie_selection;
-							if(!is_multi) {
-								p = this.get_node(old_par);
-								while(p && p.id !== $.jstree.root && !p.state[ t ? 'selected' : 'checked' ]) {
-									c = 0;
-									for(i = 0, j = p.children.length; i < j; i++) {
-										c += m[p.children[i]].state[ t ? 'selected' : 'checked' ];
-									}
-									if(j > 0 && c === j) {
-										p.state[ t ? 'selected' : 'checked' ] = true;
-										this._data[ t ? 'core' : 'checkbox' ].selected.push(p.id);
-										tmp = this.get_node(p, true);
-										if(tmp && tmp.length) {
-											tmp.children('.jstree-anchor').attr('aria-selected', true).addClass(t ? 'jstree-clicked' : 'jstree-checked');
-										}
-									}
-									else {
-										break;
-									}
-									p = this.get_node(p.parent);
-								}
-							}
-							p = new_par;
-							while(p && p.id !== $.jstree.root) {
-								c = 0;
-								for(i = 0, j = p.children.length; i < j; i++) {
-									c += m[p.children[i]].state[ t ? 'selected' : 'checked' ];
-								}
-								if(c === j) {
-									if(!p.state[ t ? 'selected' : 'checked' ]) {
-										p.state[ t ? 'selected' : 'checked' ] = true;
-										this._data[ t ? 'core' : 'checkbox' ].selected.push(p.id);
-										tmp = this.get_node(p, true);
-										if(tmp && tmp.length) {
-											tmp.children('.jstree-anchor').attr('aria-selected', true).addClass(t ? 'jstree-clicked' : 'jstree-checked');
-										}
-									}
-								}
-								else {
-									if(p.state[ t ? 'selected' : 'checked' ]) {
-										p.state[ t ? 'selected' : 'checked' ] = false;
-										this._data[ t ? 'core' : 'checkbox' ].selected = $.vakata.array_remove_item(this._data[ t ? 'core' : 'checkbox' ].selected, p.id);
-										tmp = this.get_node(p, true);
-										if(tmp && tmp.length) {
-											tmp.children('.jstree-anchor').attr('aria-selected', false).removeClass(t ? 'jstree-clicked' : 'jstree-checked');
-										}
-									}
-									else {
-										break;
-									}
-								}
-								p = this.get_node(p.parent);
-							}
 						}.bind(this));
 			}
 		};
