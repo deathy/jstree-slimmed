@@ -16,7 +16,7 @@
  * Hard slimmed-down fork Copyright (c) 2025 Cristian Vat
  */
 /*!
- * jsTree 3.3.19-slimmed
+ * jsTree 3.3.20-slimmed
  * http://jstree.com/
  *
  * Copyright (c) 2014 Ivan Bozhanov (http://vakata.com)
@@ -66,7 +66,7 @@
 		 * specifies the jstree version in use
 		 * @name $.jstree.version
 		 */
-		version : '3.3.19-slimmed',
+		version : '3.3.20-slimmed',
 		/**
 		 * holds all the default options used when creating new instances
 		 * @name $.jstree.defaults
@@ -96,9 +96,22 @@
 	 * @return {jsTree} the new instance
 	 */
 	$.jstree.create = function (el, options) {
-		var tmp = new $.jstree.core(++instance_counter),
-			opt = options;
+		var tmp = new $.jstree.core(++instance_counter);
+		var opt = options;
+
+		// avoid deep-copy of core.data which may be large, take it out and put it back in after extend/merge with defaults
+		var hasData = options && options.core && (options.core.data !== undefined);
+		var tempData;
+		if (hasData) {
+			tempData = options.core.data;
+			delete options.core.data;
+		}
 		options = $.extend(true, {}, $.jstree.defaults, options);
+		if (hasData) {
+			options.core = options.core || {};
+			options.core.data = tempData;
+		}
+
 		if(opt && opt.plugins) {
 			options.plugins = opt.plugins;
 		}
@@ -1504,7 +1517,9 @@
 							}.bind(this));
 				}
 				if ($.vakata.is_array(s)) {
-					t = $.extend(true, [], s);
+					t = s;
+					// TODO: clarify why this was doing a deep-copy
+					// t = $.extend(true, [], s);
 				} else if ($.isPlainObject(s)) {
 					t = $.extend(true, {}, s);
 				} else {

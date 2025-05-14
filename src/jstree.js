@@ -96,9 +96,22 @@
 	 * @return {jsTree} the new instance
 	 */
 	$.jstree.create = function (el, options) {
-		var tmp = new $.jstree.core(++instance_counter),
-			opt = options;
+		var tmp = new $.jstree.core(++instance_counter);
+		var opt = options;
+
+		// avoid deep-copy of core.data which may be large, take it out and put it back in after extend/merge with defaults
+		var hasData = options && options.core && (options.core.data !== undefined);
+		var tempData;
+		if (hasData) {
+			tempData = options.core.data;
+			delete options.core.data;
+		}
 		options = $.extend(true, {}, $.jstree.defaults, options);
+		if (hasData) {
+			options.core = options.core || {};
+			options.core.data = tempData;
+		}
+
 		if(opt && opt.plugins) {
 			options.plugins = opt.plugins;
 		}
@@ -1504,7 +1517,9 @@
 							}.bind(this));
 				}
 				if ($.vakata.is_array(s)) {
-					t = $.extend(true, [], s);
+					t = s;
+					// TODO: clarify why this was doing a deep-copy
+					// t = $.extend(true, [], s);
 				} else if ($.isPlainObject(s)) {
 					t = $.extend(true, {}, s);
 				} else {
