@@ -110,6 +110,18 @@ for (const jq of JQUERY) {
 				assert.equal($(anchor('a22')).children('.jstree-checkbox-disabled').length, 1);
 			});
 
+			it('uses the undetermined hint of unloaded nodes without changing the data', async function () {
+				const data = [{ id: 'r', text: 'Root', state: { opened: true }, children: [
+					{ id: 'l', text: 'Lazy', children: true, state: { undetermined: true } },
+					{ id: 'm', text: 'Loaded' }
+				] }];
+				const t = await createTree(env, '#tree', { core: { data: data }, plugins: ['checkbox'] });
+				same(t.get_undetermined().sort(), ['l', 'r']);
+				t.check_node('r');
+				same(t.get_undetermined(), []);
+				assert.equal(data[0].children[0].state.undetermined, true, 'hint in the data is left as it was');
+			});
+
 			it('keeps checked state through get_state / set_state', async function () {
 				const t = await createTree(env, '#tree', { core: { data: sample() }, plugins: ['checkbox'], checkbox: { tie_selection: false } });
 				t.check_node('b');

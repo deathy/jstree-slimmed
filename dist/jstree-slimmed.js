@@ -48,6 +48,24 @@
 		src = $('script:last').attr('src'),
 		document = window.document; // local variable is always faster to access then a global
 
+	// node.original keeps the object a node was parsed from, minus children / data (those live in the model).
+	// It is a copy so the data passed in is never changed and can be loaded again (refresh, other instances).
+	// (_append_json_data has its own copy of this function, as its parser also runs in a web worker)
+	var to_original = function (d) {
+		if(!d || typeof d !== 'object') { return d; }
+		var o = {}, k;
+		for(k in d) {
+			if(d.hasOwnProperty(k) && k !== 'children' && k !== 'data') { o[k] = d[k]; }
+		}
+		if(d.state && typeof d.state === 'object') {
+			o.state = {};
+			for(k in d.state) {
+				if(d.state.hasOwnProperty(k)) { o.state[k] = d.state[k]; }
+			}
+		}
+		return o;
+	};
+
 	var setImmediate = window.setImmediate;
 	var Promise = window.Promise;
 	if (!setImmediate && Promise) {
@@ -99,16 +117,18 @@
 		var tmp = new $.jstree.core(++instance_counter);
 		var opt = options;
 
-		// avoid deep-copy of core.data which may be large, take it out and put it back in after extend/merge with defaults
+		// avoid deep-copy of core.data which may be large: merge the rest with the defaults and put it back in after
+		// (shallow copies, so the caller's options object is left untouched)
 		var hasData = options && options.core && (options.core.data !== undefined);
 		var tempData;
 		if (hasData) {
 			tempData = options.core.data;
+			options = $.extend({}, options);
+			options.core = $.extend({}, options.core);
 			delete options.core.data;
 		}
 		options = $.extend(true, {}, $.jstree.defaults, options);
 		if (hasData) {
-			options.core = options.core || {};
 			options.core.data = tempData;
 		}
 
@@ -538,11 +558,6 @@
 				// end
 				e.preventDefault();
 				this.element.find('.jstree-anchor').filter(':visible').last().trigger('focus');
-			},
-			'f2': function (e) {
-				// f2 - safe to include - if check_callback is false it will fail
-				e.preventDefault();
-				this.edit(e.currentTarget);
 			}
 		},
         /**
@@ -1517,9 +1532,8 @@
 							}.bind(this));
 				}
 				if ($.vakata.is_array(s)) {
+					// no deep-copy needed, parsing does not modify the data (see to_original)
 					t = s;
-					// TODO: clarify why this was doing a deep-copy
-					// t = $.extend(true, [], s);
 				} else if ($.isPlainObject(s)) {
 					t = $.extend(true, {}, s);
 				} else {
@@ -1666,7 +1680,22 @@
 						m = data.m,
 						p = m[par],
 						sel = data.sel,
-						tmp, i, j, rslt,
+						tmp, i, j, k, rslt,
+						// same as the module level to_original (this function is also serialized into a web worker)
+						to_original = function (d) {
+							if(!d || typeof d !== 'object') { return d; }
+							var o = {}, k;
+							for(k in d) {
+								if(d.hasOwnProperty(k) && k !== 'children' && k !== 'data') { o[k] = d[k]; }
+							}
+							if(d.state && typeof d.state === 'object') {
+								o.state = {};
+								for(k in d.state) {
+									if(d.state.hasOwnProperty(k)) { o.state[k] = d.state[k]; }
+								}
+							}
+							return o;
+						},
 						parse_flat = function (d, p, ps) {
 							if(!ps) { ps = []; }
 							else { ps = ps.concat(); }
@@ -1746,9 +1775,7 @@
 									tmp.children_d = tmp.children_d.concat(e.children_d);
 								}
 							}
-							delete d.data;
-							delete d.children;
-							m[tmp.id].original = d;
+							m[tmp.id].original = to_original(d);
 							if(tmp.state.selected) {
 								add.push(tmp.id);
 							}
@@ -1846,9 +1873,7 @@
 								tmp.children = [];
 								tmp.children_d = [];
 							}
-							delete d.data;
-							delete d.children;
-							tmp.original = d;
+							tmp.original = to_original(d);
 							m[tmp.id] = tmp;
 							if(tmp.state.selected) {
 								add.push(tmp.id);
@@ -1858,15 +1883,22 @@
 
 					if(dat.length && dat[0].id !== undefined && dat[0].parent !== undefined) {
 						// Flat JSON support (for easy import from DB):
-						// 1) convert to object (foreach)
+						// 1) convert to object (foreach) - on a copy, children are collected below and the input stays as is
 						for(i = 0, j = dat.length; i < j; i++) {
-							if(!dat[i].children) {
-								dat[i].children = [];
+							tmp = {};
+							for(k in dat[i]) {
+								if(dat[i].hasOwnProperty(k)) { tmp[k] = dat[i][k]; }
 							}
-							if(!dat[i].state) {
-								dat[i].state = {};
+							if(!tmp.children) {
+								tmp.children = [];
 							}
-							m[dat[i].id.toString()] = dat[i];
+							else if(Array.isArray(tmp.children)) {
+								tmp.children = tmp.children.slice();
+							}
+							if(!tmp.state) {
+								tmp.state = {};
+							}
+							m[dat[i].id.toString()] = tmp;
 						}
 						// 2) populate children (foreach)
 						for(i = 0, j = dat.length; i < j; i++) {
@@ -2257,9 +2289,7 @@
 					tmp.children_d = tmp.children_d.concat(e.children_d);
 				}
 			}
-			delete d.data;
-			delete d.children;
-			m[tmp.id].original = d;
+			m[tmp.id].original = to_original(d);
 			if(tmp.state.selected) {
 				this._data.core.selected.push(tmp.id);
 			}
@@ -2366,9 +2396,7 @@
 				tmp.children = [];
 				tmp.children_d = [];
 			}
-			delete d.data;
-			delete d.children;
-			tmp.original = d;
+			tmp.original = to_original(d);
 			m[tmp.id] = tmp;
 			if(tmp.state.selected) {
 				this._data.core.selected.push(tmp.id);
