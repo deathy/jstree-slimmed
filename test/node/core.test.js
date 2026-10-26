@@ -232,9 +232,7 @@ for (const jq of JQUERY) {
 				assert.ok(anchor('b1'));
 			});
 
-			// since "avoid deep-copy of core.data" the data array passed in is consumed while parsing,
-			// so a refresh re-reads a mutated array that lost its children / state (same on jQuery 3 and 4)
-			it('refreshes a tree built from a static data array', { todo: 'core.data array is mutated by the first load' }, async function () {
+			it('refreshes a tree built from a static data array', async function () {
 				const t = await createTree(env, '#tree', { core: { data: sample() } });
 				t.open_node('b');
 				t.select_node('b1');
@@ -244,13 +242,80 @@ for (const jq of JQUERY) {
 				assert.equal(t.is_open('b'), true);
 				same(t.get_selected(), ['b1']);
 				assert.ok(anchor('b1'));
+				same(t.get_node('a').children_d.sort(), ['a1', 'a2', 'a21', 'a22']);
 			});
 
-			it('does not modify the options object it is given', { todo: 'core.data is deleted from the caller options' }, async function () {
-				const options = { core: { data: sample(), multiple: false } };
-				await createTree(env, '#tree', options);
-				assert.ok(Array.isArray(options.core.data) || options.core.data instanceof env.window.Array);
-				assert.equal(options.core.data[1].children.length, 1);
+			it('does not modify the options object or the data it is given', async function () {
+				const options = { core: { data: sample(), multiple: false }, plugins: ['checkbox'] };
+				const t = await createTree(env, '#tree', options);
+				same(Object.keys(options.core).sort(), ['data', 'multiple']);
+				assert.deepStrictEqual(options.core.data, sample(), 'data array is left as it was');
+				assert.equal(t.settings.core.data, options.core.data, 'data is not copied');
+				assert.equal(t.settings.core.multiple, false);
+				t.check_all();
+				t.open_all();
+				t.refresh();
+				assert.deepStrictEqual(options.core.data, sample());
+			});
+
+			it('can build two trees from the same data', async function () {
+				const data = sample();
+				const t1 = await createTree(env, '#tree', { core: { data: data } });
+				const t2 = await createTree(env, '#other', { core: { data: data } });
+				const texts = function (t) { return JSON.stringify(t.get_json('#', { flat: true }).map(function (n) { return n.text; })); };
+				assert.equal(texts(t2), texts(t1));
+				assert.equal(t2.get_node('#').children_d.length, 8);
+			});
+
+			it('does not modify data returned from a callback', async function () {
+				const served = sample();
+				const t = await createTree(env, '#tree', { core: { data: function (node, cb) { cb(served); } } });
+				t.open_all();
+				assert.deepStrictEqual(served, sample());
+				const refreshed = nextEvent(env, '#tree', 'refresh.jstree');
+				t.refresh();
+				await refreshed;
+				assert.equal(t.get_node('#').children_d.length, 8);
+			});
+
+			it('keeps the source object as node.original without children and data', async function () {
+				const data = [{ id: 'x', text: 'X', custom: 42, data: { y: 1 }, state: { opened: true }, children: [{ id: 'x1', text: 'X1' }] }];
+				const t = await createTree(env, '#tree', { core: { data: data } });
+				const original = t.get_node('x').original;
+				same(original, { id: 'x', text: 'X', custom: 42, state: { opened: true } });
+				assert.notEqual(original, data[0]);
+				assert.notEqual(original.state, data[0].state);
+				same(t.get_node('x').data, { y: 1 });
+				same(t.get_node('x').children, ['x1']);
+			});
+
+			it('loads flat (id / parent) data and reloads it the same way', async function () {
+				const flat = [
+					{ id: 'p', parent: '#', text: 'Parent', state: { opened: true } },
+					{ id: 'k1', parent: 'p', text: 'Kid 1' },
+					{ id: 'k2', parent: 'p', text: 'Kid 2' },
+					{ id: 'q', parent: '#', text: 'Other' }
+				];
+				const before = JSON.parse(JSON.stringify(flat));
+				const t = await createTree(env, '#tree', { core: { data: flat } });
+				same(t.get_node('#').children, ['p', 'q']);
+				same(t.get_node('p').children, ['k1', 'k2']);
+				assert.equal(t.get_node('k1').original.parent, 'p');
+				assert.deepStrictEqual(flat, before, 'flat data is left as it was');
+				const refreshed = nextEvent(env, '#tree', 'refresh.jstree');
+				t.refresh();
+				await refreshed;
+				same(t.get_node('p').children, ['k1', 'k2'], 'no duplicate children after a reload');
+				same(t.get_node('#').children_d.sort(), ['k1', 'k2', 'p', 'q']);
+				assert.ok(anchor('k2'));
+			});
+
+			it('does not modify the object given to create_node', async function () {
+				const t = await createTree(env, '#tree', { core: { data: sample(), check_callback: true } });
+				const node = { id: 'n', text: 'New', data: { z: 1 }, children: [{ id: 'n1', text: 'New child' }] };
+				t.create_node('c', node);
+				same(t.get_node('n').children, ['n1']);
+				same(node, { id: 'n', text: 'New', data: { z: 1 }, children: [{ id: 'n1', text: 'New child' }] });
 			});
 
 			it('lazy loads children from a data callback', async function () {
@@ -381,6 +446,14 @@ for (const jq of JQUERY) {
 				key(env, anchor('c'), 'keydown', KEY.down);
 				assert.equal(focused(), 'c', 'defaults are replaced');
 				assert.equal(t.get_node('c').id, 'c');
+			});
+
+			it('ignores F2 (no inline editing in this build)', async function () {
+				await createTree(env, '#tree', { core: { data: sample() } });
+				anchor('c').focus();
+				const ev = key(env, anchor('c'), 'keydown', 113);
+				assert.equal(ev.defaultPrevented, false);
+				assert.equal(focused(), 'c');
 			});
 
 			it('can be destroyed and recreated', async function () {
