@@ -16,7 +16,7 @@
  * Hard slimmed-down fork Copyright (c) 2025 Cristian Vat
  */
 /*!
- * jsTree 3.3.20-slimmed
+ * jsTree 4.0.0-slimmed
  * http://jstree.com/
  *
  * Copyright (c) 2014 Ivan Bozhanov (http://vakata.com)
@@ -66,7 +66,7 @@
 		 * specifies the jstree version in use
 		 * @name $.jstree.version
 		 */
-		version : '3.3.20-slimmed',
+		version : '4.0.0-slimmed',
 		/**
 		 * holds all the default options used when creating new instances
 		 * @name $.jstree.defaults

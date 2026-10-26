@@ -2,7 +2,7 @@
   "name": "@deathy/jstree-slimmed",
   "title": "jsTree-slimmed",
   "description": "jQuery tree plugin - slimmed down fork",
-  "version": "3.3.20-slimmed",
+  "version": "4.0.0-slimmed",
   "homepage": "https://github.com/deathy/jstree-slimmed",
   "main": "./dist/jstree-slimmed.js",
   "author": "deathy",
@@ -33,6 +33,10 @@
     }
   ],
   "keywords": [],
+  "scripts": {
+    "build": "grunt",
+    "test": "node --test \"test/node/*.test.js\""
+  },
   "devDependencies": {
     "grunt": "~1.6.1",
     "grunt-contrib-concat": "*",
@@ -43,10 +47,13 @@
     "grunt-contrib-uglify": "^5.0.1",
     "grunt-contrib-watch": "~1.1.0",
     "grunt-text-replace": "~0.4.0",
+    "jquery": "^4.0.0",
+    "jquery3": "npm:jquery@^3.7.1",
+    "jsdom": "^29.1.1",
     "lodash": "^4.17.21"
   },
-  "dependencies": {
-    "jquery": "^3.5.0"
+  "peerDependencies": {
+    "jquery": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"
