@@ -4,6 +4,37 @@ Hard fork with most features except basic tree and checkboxes removed.
 
 Probably nobody should be using this, you probably want the great original [jsTree](https://github.com/vakata/jstree)
 
+## Versions and jQuery
+
+| jstree-slimmed | jQuery |
+| --- | --- |
+| `4.x-slimmed` | 4.x (`^4.0.0`) |
+| `3.3.x-slimmed` (last: `3.3.20-slimmed`) | 3.x (`^3.5.0`) |
+
+From `4.0.0-slimmed` on, jQuery is a peer dependency: install it next to jstree-slimmed and jstree registers itself on that jQuery instance.
+
+```
+npm install jquery@4 @deathy/jstree-slimmed
+```
+
+Still on jQuery 3? Stay on `3.3.20-slimmed`:
+
+```
+npm install jquery@3 @deathy/jstree-slimmed@3.3.20-slimmed
+```
+
+Use the full jQuery build, not the slim one, if you load nodes over AJAX (`core.data.url` / massload `url`).
+
+Only the core and the `checkbox`, `changed` and `massload` plugins are included.
+
+## Development
+
+```
+npm install
+npm run build   # grunt: lint, build dist/, themes
+npm test        # node:test + jsdom, runs against dist/ with both jQuery 4 and jQuery 3
+```
+
 # jstree
 
 [jsTree](http://www.jstree.com/) is jquery plugin, that provides interactive trees. It is absolutely free, [open source](https://github.com/vakata/jstree) and distributed under the MIT license.

@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      # install scripts only fetch imagemin binaries, which are not needed here
+      - run: npm ci --ignore-scripts
+      - name: Lint and rebuild dist/jstree-slimmed.js
+        run: npx grunt jshint:beforeconcat concat amd jshint:afterconcat replace
+      - name: Check dist is up to date with src
+        run: git diff --exit-code -- dist/jstree-slimmed.js
+      - run: npm test
